@@ -29,11 +29,10 @@ exports.query = function (collection) {
     operators.sort(function (a, b) {
         return (OPERATORS_PRIORITY[a.name] > OPERATORS_PRIORITY[b.name]);
     });
-    operators.forEach(function (operator) {
-        collectionCopy = operator(collectionCopy);
-    });
 
-    return collectionCopy;
+    return operators.reduce(function (resultCollection, currentOperator) {
+        return currentOperator(resultCollection);
+    }, collectionCopy);
 };
 
 
@@ -47,14 +46,14 @@ exports.select = function () {
 
     return function select(collection) {
         return collection.map(function (contact) {
-            var acc = {};
+            var contactWithReqProps = {};
             reqProperties.forEach(function (property) {
                 if (property in contact) {
-                    acc[property] = contact[property];
+                    contactWithReqProps[property] = contact[property];
                 }
             });
 
-            return acc;
+            return contactWithReqProps;
         });
     };
 };
@@ -83,6 +82,9 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort(function (a, b) {
+            if (a[property] === b[property]) {
+                return 0;
+            }
             if (order === 'asc') {
                 return (a[property] > b[property]);
             }
