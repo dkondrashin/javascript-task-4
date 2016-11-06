@@ -48,7 +48,7 @@ exports.select = function () {
         return collection.map(function (contact) {
             var contactWithReqProps = {};
             reqProperties.forEach(function (property) {
-                if (property in contact) {
+                if (contact.hasOwnProperty(property)) {
                     contactWithReqProps[property] = contact[property];
                 }
             });
