@@ -14,7 +14,6 @@ var OPERATORS_PRIORITY = {
     format: 5
 };
 
-
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -27,14 +26,13 @@ exports.query = function (collection) {
         return Object.assign({}, contact);
     });
     operators.sort(function (a, b) {
-        return (OPERATORS_PRIORITY[a.name] > OPERATORS_PRIORITY[b.name]);
+        return Math.sign(OPERATORS_PRIORITY[a.name] - OPERATORS_PRIORITY[b.name]);
     });
 
     return operators.reduce(function (resultCollection, currentOperator) {
         return currentOperator(resultCollection);
     }, collectionCopy);
 };
-
 
 /**
  * Выбор полей
@@ -68,7 +66,7 @@ exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter(function (contact) {
 
-            return (values.indexOf(contact[property]) !== -1);
+            return values.indexOf(contact[property]) !== -1;
         });
     };
 };
@@ -86,10 +84,10 @@ exports.sortBy = function (property, order) {
                 return 0;
             }
             if (order === 'asc') {
-                return (a[property] > b[property]);
+                return a[property] > b[property];
             }
 
-            return (a[property] < b[property]);
+            return a[property] < b[property];
         });
     };
 };
@@ -116,6 +114,10 @@ exports.format = function (property, formatter) {
  * @returns {function}
  */
 exports.limit = function (count) {
+    if (count < 0) {
+        count = 0;
+    }
+
     return function limit(collection) {
 
         return collection.slice(0, count);
